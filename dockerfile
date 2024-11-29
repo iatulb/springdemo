@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 RUN mvn clean
 RUN mvn install
-COPY target/* /opt/app
+COPY /app/target/* /opt/app
 
 EXPOSE 8092
 
