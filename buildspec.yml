@@ -1,0 +1,36 @@
+version: 0.2
+env:
+  variables:
+    JAVA_HOME: "/usr/lib/jvm/java-17-amazon-corretto/"
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+  pre_build:
+    commands:
+      - echo Logging in to AWS ECR  
+      - java --version
+      - docker --version   
+      - yum install java-17-amazon-corretto-devel -y 
+      - update-alternatives --auto javac
+      - update-alternatives --auto java
+      - update-alternatives --install /usr/bin/java java /usr/lib/jvm/java-17-amazon-corretto/bin/java 2
+      - update-alternatives --install /usr/bin/javac javac /usr/lib/jvm/java-17-amazon-corretto/bin/javac 2
+      - java --version   
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 586794465381.dkr.ecr.ap-south-1.amazonaws.com   
+  build:
+    commands:
+      - echo Build started on %DATE% %TIME%
+      - mvn clean
+      - mvn install
+      - echo Building docker image
+      - docker build -t demojava .
+      - docker tag demojava 586794465381.dkr.ecr.ap-south-1.amazonaws.com/demojava 
+  post_build:
+    commands:
+      - echo Build completed on %DATE% %TIME%
+      - echo pushing the docker image 
+      - docker push 586794465381.dkr.ecr.ap-south-1.amazonaws.com/demojava 
+artifacts:
+  files:
+    - target/demo-0.0.1-SNAPSHOT.jar
